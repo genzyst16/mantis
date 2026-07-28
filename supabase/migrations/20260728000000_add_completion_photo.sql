@@ -1,0 +1,1 @@
+ALTER TABLE corrective_actions ADD COLUMN completion_photo_url TEXT;

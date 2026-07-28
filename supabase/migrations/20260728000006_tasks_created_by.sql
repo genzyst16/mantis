@@ -1,0 +1,1 @@
+ALTER TABLE corrective_actions ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
