@@ -6,6 +6,7 @@ import { CreateTaskModal } from "@/components/CreateTaskModal";
 import { TaskStatusSelect } from "@/components/TaskStatusSelect";
 import { DeleteTaskButton } from "@/components/DeleteTaskButton";
 import { EditTaskModal } from "@/components/EditTaskModal";
+import { CloseTaskButton } from "@/components/CloseTaskButton";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
@@ -33,6 +34,7 @@ export default async function AdminTasksPage() {
   }
 
   const canManage = hasPermission(userPerms, "tasks.manage");
+  const canCloseGeneral = hasPermission(userPerms, "tasks.close") || userPerms.is_super_admin;
 
   const rolesData: any = currentUserProfile?.roles;
   const userRole = (Array.isArray(rolesData) ? rolesData[0]?.name : rolesData?.name) || "Personnel";
@@ -158,14 +160,24 @@ export default async function AdminTasksPage() {
                     {action.due_date ? new Date(action.due_date).toLocaleDateString() : <span className="text-slate-400">—</span>}
                   </TableCell>
                   <TableCell className="text-right">
-                    {canManage ? (
-                      <div className="flex items-center justify-end">
-                        <EditTaskModal task={action} properties={properties || []} personnel={personnel || []} />
-                        <DeleteTaskButton taskId={action.id} taskTitle={action.finding_description} />
-                      </div>
-                    ) : (
-                      <span className="text-xs text-slate-400 italic">View Only</span>
-                    )}
+                    <div className="flex justify-end gap-2 items-center">
+                      <CloseTaskButton 
+                        taskId={action.id} 
+                        status={action.status} 
+                        canClose={canCloseGeneral || action.created_by === user.id} 
+                      />
+                      
+                      {canManage && (
+                        <>
+                          <EditTaskModal 
+                            task={action} 
+                            properties={properties || []} 
+                            personnel={personnel || []} 
+                          />
+                          <DeleteTaskButton taskId={action.id} taskTitle={action.finding_description} />
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
