@@ -41,7 +41,7 @@ export function TaskDetailsSheet({
         </Button>
       } />
       
-      <SheetContent className="sm:max-w-md overflow-y-auto">
+      <SheetContent className="sm:max-w-md overflow-y-auto p-6 sm:p-8">
         <SheetHeader className="mb-6">
           <SheetTitle>{isClosed ? "View Task Details" : "Edit Task"}</SheetTitle>
         </SheetHeader>
