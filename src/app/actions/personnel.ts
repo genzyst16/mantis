@@ -5,7 +5,7 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 export async function updatePersonnel(userId: string, data: { 
-  employee_number?: string; 
+  employee_number?: string | null; 
   role_id?: string | null; 
   is_active?: boolean;
   user_type?: string;

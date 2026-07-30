@@ -39,7 +39,7 @@ export function EditPersonnelModal({ user, roles, properties }: { user: any; rol
     
     setIsSubmitting(true);
     const result = await updatePersonnel(user.id, {
-      employee_number: empNum,
+      employee_number: empNum.trim() === "" ? null : empNum,
       role_id: roleId || null,
       is_active: isActive === "true",
       user_type: userType,
