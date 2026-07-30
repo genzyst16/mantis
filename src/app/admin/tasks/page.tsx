@@ -42,7 +42,7 @@ export default async function AdminTasksPage() {
   
   const { data: personnel } = await supabase
     .from("profiles")
-    .select("id, full_name");
+    .select("id, full_name, email");
   
   const { data: rawActions } = await supabase
     .from("corrective_actions")
@@ -56,7 +56,7 @@ export default async function AdminTasksPage() {
     .order("property_name");
 
   // Build a lookup map from profiles to join manually (avoids ambiguous FK hint issues)
-  const personnelMap = new Map((personnel || []).map((p: any) => [p.id, p.full_name]));
+  const personnelMap = new Map((personnel || []).map((p: any) => [p.id, p.full_name || p.email || "Unknown"]));
   const propertyMap = new Map((properties || []).map((p: any) => [p.id, p.property_name]));
 
   const actions = rawActions?.map(a => ({
@@ -162,7 +162,7 @@ export default async function AdminTasksPage() {
                       <SelectContent>
                         <SelectItem value="unassigned">— Leave Unassigned —</SelectItem>
                         {personnel?.map((p: any) => (
-                          <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                          <SelectItem key={p.id} value={p.id}>{p.full_name || p.email || "Unknown"}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

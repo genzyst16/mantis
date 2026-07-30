@@ -114,13 +114,18 @@ export function EditTaskModal({
               <Select name="assigned_user_id" value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger id="assigned_user_id">
                   <span className="truncate flex-1 text-left">
-                    {assigneeId !== "unassigned" ? personnel?.find(p => p.id === assigneeId)?.full_name : "— Leave Unassigned —"}
+                    {assigneeId !== "unassigned" 
+                      ? (() => {
+                          const p = personnel?.find(p => p.id === assigneeId);
+                          return p ? (p.full_name || p.email || "Unknown") : "— Leave Unassigned —";
+                        })()
+                      : "— Leave Unassigned —"}
                   </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">— Leave Unassigned —</SelectItem>
                   {personnel?.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>{p.full_name || p.email || "Unknown"}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

@@ -20,7 +20,7 @@ export function TaskStatusSelect({
   taskId: string; 
   currentStatus: string;
   userRole: string;
-  personnel: { id: string, full_name: string }[];
+  personnel: { id: string, full_name?: string, email?: string }[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [activeStatus, setActiveStatus] = useState(currentStatus);
@@ -129,7 +129,7 @@ export function TaskStatusSelect({
                 </SelectTrigger>
                 <SelectContent>
                   {personnel.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>{p.full_name || p.email || "Unknown"}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
