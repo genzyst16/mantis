@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CreateTaskModal } from "@/components/CreateTaskModal";
 import { TaskStatusSelect } from "@/components/TaskStatusSelect";
 import { DeleteTaskButton } from "@/components/DeleteTaskButton";
