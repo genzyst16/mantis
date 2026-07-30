@@ -43,11 +43,17 @@ export default async function AdminSchedulesPage() {
                 <Label htmlFor="checkpoint_id">Checkpoint</Label>
                 <Select name="checkpoint_id" required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Checkpoint" />
+                    <SelectValue placeholder="Select Checkpoint">
+                      {(val: string | null) => {
+                        if (!val) return "Select Checkpoint";
+                        const cp = checkpoints?.find((c: any) => c.id === val);
+                        return cp ? cp.checkpoint_name : "Select Checkpoint";
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {checkpoints?.map(cp => (
-                      <SelectItem key={cp.id} value={cp.id}>{cp.checkpoint_name}</SelectItem>
+                      <SelectItem key={cp.id} value={cp.id} label={cp.checkpoint_name}>{cp.checkpoint_name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
