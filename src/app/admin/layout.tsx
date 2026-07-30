@@ -11,6 +11,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Menu } from 'lucide-react';
 import { AdminSidebarNav } from '@/components/AdminSidebarNav';
 import Image from 'next/image';
+import { getUserPermissions } from '@/lib/permissions';
+import { LayoutDashboard } from 'lucide-react';
 
 export default async function AdminLayout({
   children,
@@ -30,7 +32,8 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  // Ideally we would verify this user has the Admin role here.
+  const userPerms = await getUserPermissions(supabase, user.id);
+  const hasAdminAccess = userPerms.is_super_admin || userPerms.permissions.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex">
@@ -80,8 +83,16 @@ export default async function AdminLayout({
             {/* Spacer for desktop */}
             <div className="hidden md:block flex-1"></div>
 
-            {/* Profile Dropdown */}
+            {/* Top Right Actions */}
             <div className="flex items-center gap-4">
+              {hasAdminAccess && (
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm" className="hidden sm:flex gap-2 text-slate-600 bg-white hover:bg-slate-50 border-slate-200">
+                    <LayoutDashboard size={16} />
+                    Maintenance Dashboard
+                  </Button>
+                </Link>
+              )}
               <ProfileMenu profile={profile} />
             </div>
         </header>
