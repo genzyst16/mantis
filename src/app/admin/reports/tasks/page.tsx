@@ -58,11 +58,15 @@ export default async function AdminTasksReportPage(props: { searchParams: Promis
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Open": return <Badge className="bg-blue-500 hover:bg-blue-600">{status}</Badge>;
-      case "In Progress": return <Badge className="bg-amber-500 hover:bg-amber-600">{status}</Badge>;
-      case "Resolved": return <Badge className="bg-emerald-500 hover:bg-emerald-600">{status}</Badge>;
-      case "Closed": return <Badge className="bg-slate-500 hover:bg-slate-600">{status}</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
+      case "Unassigned": return <Badge variant="secondary">{status}</Badge>;
+      case "Assigned": return <Badge className="bg-blue-500 hover:bg-blue-600">{status}</Badge>;
+      case "On-going": return <Badge className="bg-amber-500 hover:bg-amber-600">{status}</Badge>;
+      case "Paused": return <Badge className="bg-slate-400 hover:bg-slate-500">{status}</Badge>;
+      case "Endorsed": return <Badge className="bg-indigo-500 hover:bg-indigo-600">{status}</Badge>;
+      case "Pending": return <Badge className="bg-orange-500 hover:bg-orange-600">{status}</Badge>;
+      case "Completed": return <Badge className="bg-emerald-500 hover:bg-emerald-600">{status}</Badge>;
+      case "Closed": return <Badge className="bg-red-600 hover:bg-red-700">{status}</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -111,9 +115,13 @@ export default async function AdminTasksReportPage(props: { searchParams: Promis
               className="flex h-9 w-full rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-950"
             >
               <option value="all">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
+              <option value="Unassigned">Unassigned</option>
+              <option value="Assigned">Assigned</option>
+              <option value="On-going">On-going</option>
+              <option value="Paused">Paused</option>
+              <option value="Endorsed">Endorsed</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
               <option value="Closed">Closed</option>
             </select>
           </div>
