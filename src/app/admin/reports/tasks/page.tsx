@@ -25,8 +25,7 @@ export default async function AdminTasksReportPage(props: { searchParams: Promis
     .from("corrective_actions")
     .select(`
       *,
-      properties(property_name),
-      profiles(full_name, email)
+      properties(property_name)
     `)
     .order("created_at", { ascending: false });
 
@@ -53,8 +52,16 @@ export default async function AdminTasksReportPage(props: { searchParams: Promis
     query = query.lte("due_date", `${dueEndFilter}T23:59:59.999Z`);
   }
 
-  const { data: tasks, error } = await query.limit(500);
+  const { data: rawTasks, error } = await query.limit(500);
   const { data: properties } = await supabase.from("properties").select("id, property_name").eq("is_active", true);
+  const { data: personnel } = await supabase.from("profiles").select("id, full_name, email");
+
+  const personnelMap = new Map((personnel || []).map((p: any) => [p.id, p]));
+
+  const tasks = (rawTasks || []).map((t: any) => ({
+    ...t,
+    profiles: personnelMap.get(t.assigned_user_id) || null
+  }));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
