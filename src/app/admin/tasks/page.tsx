@@ -13,6 +13,9 @@ import { TaskStatusSelect } from "@/components/TaskStatusSelect";
 import { DeleteTaskButton } from "@/components/DeleteTaskButton";
 import { EditTaskModal } from "@/components/EditTaskModal";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminTasksPage() {
   const supabase = await createClient();
@@ -40,9 +43,18 @@ export default async function AdminTasksPage() {
   const rolesData: any = currentUserProfile?.roles;
   const userRole = (Array.isArray(rolesData) ? rolesData[0]?.name : rolesData?.name) || "Personnel";
   
-  const { data: personnel } = await supabase
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  
+  const { data: personnel, error: personnelError } = await supabaseAdmin
     .from("profiles")
     .select("id, full_name, email");
+    
+  if (personnelError) {
+    console.error("Error fetching personnel with Admin Client:", personnelError);
+  }
   
   const { data: rawActions } = await supabase
     .from("corrective_actions")
