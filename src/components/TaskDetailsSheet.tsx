@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil } from "lucide-react";
+import { Pencil, Eye } from "lucide-react";
 import { updateCorrectiveAction } from "@/app/admin/tasks/actions";
 
-export function EditTaskModal({ 
+export function TaskDetailsSheet({ 
   task, 
   properties, 
   personnel 
@@ -26,16 +26,28 @@ export function EditTaskModal({
   const [assigneeId, setAssigneeId] = useState(task.assigned_user_id || "unassigned");
   const [severity, setSeverity] = useState(task.severity || "Medium");
 
+  const isClosed = task.status === "Closed";
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="ghost" size="sm" className="text-slate-500 hover:text-blue-600 mr-2" title="Edit Task" />}>
-        <Pencil className="h-4 w-4" />
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger render={
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-slate-500 hover:text-blue-600 mr-2" 
+          title={isClosed ? "View Task" : "Edit Task"}
+        >
+          {isClosed ? <Eye className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+        </Button>
+      } />
+      
+      <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle>{isClosed ? "View Task Details" : "Edit Task"}</SheetTitle>
+        </SheetHeader>
+        
         <form action={async (formData: FormData) => {
+          if (isClosed) return; // Prevent submission if closed
           setIsSubmitting(true);
           const result = await updateCorrectiveAction(task.id, formData);
           setIsSubmitting(false);
@@ -44,66 +56,66 @@ export function EditTaskModal({
           } else {
             setOpen(false);
           }
-        }} className="space-y-4 pt-2">
+        }} className="space-y-6">
           
           <div className="space-y-2">
-            <Label htmlFor="finding_description">Task Title / Issue Description <span className="text-red-500">*</span></Label>
+            <Label htmlFor="finding_description">Task Title / Issue Description {isClosed ? "" : <span className="text-red-500">*</span>}</Label>
             <Input
               id="finding_description"
               name="finding_description"
-              required
+              required={!isClosed}
+              disabled={isClosed}
               defaultValue={task.finding_description}
               placeholder="e.g. Replace broken fire extinguisher in Block A"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="action_required">Action Required <span className="text-red-500">*</span></Label>
+            <Label htmlFor="action_required">Action Required {isClosed ? "" : <span className="text-red-500">*</span>}</Label>
             <Textarea
               id="action_required"
               name="action_required"
-              required
+              required={!isClosed}
+              disabled={isClosed}
               defaultValue={task.action_required || ""}
               placeholder="Describe the specific steps the assignee needs to take..."
-              className="min-h-[80px] resize-none"
+              className="min-h-[120px] resize-none"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="severity">Severity <span className="text-red-500">*</span></Label>
-              <Select name="severity" value={severity} onValueChange={setSeverity} required>
+              <Label htmlFor="severity">Severity {isClosed ? "" : <span className="text-red-500">*</span>}</Label>
+              <Select name="severity" value={severity} onValueChange={setSeverity} required={!isClosed} disabled={isClosed}>
                 <SelectTrigger id="severity">
                   <SelectValue placeholder="Select severity" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Low" label="Low">🟢 Low</SelectItem>
-                  <SelectItem value="Medium" label="Medium">🟡 Medium</SelectItem>
-                  <SelectItem value="High" label="High">🟠 High</SelectItem>
-                  <SelectItem value="Critical" label="Critical">🔴 Critical</SelectItem>
+                  <SelectItem value="Low">🟢 Low</SelectItem>
+                  <SelectItem value="Medium">🟡 Medium</SelectItem>
+                  <SelectItem value="High">🟠 High</SelectItem>
+                  <SelectItem value="Critical">🔴 Critical</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="due_date">Due Date</Label>
-              <Input id="due_date" name="due_date" type="date" defaultValue={task.due_date || ""} />
+              <Input id="due_date" name="due_date" type="date" defaultValue={task.due_date ? task.due_date.split('T')[0] : ""} disabled={isClosed} />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="property_id">Property</Label>
-              <Select name="property_id" value={propertyId} onValueChange={setPropertyId}>
+              <Select name="property_id" value={propertyId} onValueChange={setPropertyId} disabled={isClosed}>
                 <SelectTrigger id="property_id">
                   <span className="truncate flex-1 text-left">
                     {propertyId !== "none" ? properties?.find(p => p.id === propertyId)?.property_name : "— No Property —"}
                   </span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none" label="— No Property —">— No Property —</SelectItem>
+                  <SelectItem value="none">— No Property —</SelectItem>
                   {properties?.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id} label={p.property_name}>{p.property_name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>{p.property_name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -111,7 +123,7 @@ export function EditTaskModal({
 
             <div className="space-y-2">
               <Label htmlFor="assigned_user_id">Assign To</Label>
-              <Select name="assigned_user_id" value={assigneeId} onValueChange={setAssigneeId}>
+              <Select name="assigned_user_id" value={assigneeId} onValueChange={setAssigneeId} disabled={isClosed}>
                 <SelectTrigger id="assigned_user_id">
                   <span className="truncate flex-1 text-left">
                     {assigneeId !== "unassigned" 
@@ -123,21 +135,23 @@ export function EditTaskModal({
                   </span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned" label="— Leave Unassigned —">— Leave Unassigned —</SelectItem>
+                  <SelectItem value="unassigned">— Leave Unassigned —</SelectItem>
                   {personnel?.map((p: any) => {
                     const name = p.full_name || p.email || "Unknown";
-                    return <SelectItem key={p.id} value={p.id} label={name}>{name}</SelectItem>
+                    return <SelectItem key={p.id} value={p.id}>{name}</SelectItem>
                   })}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-4" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
+          {!isClosed && (
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-6" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          )}
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

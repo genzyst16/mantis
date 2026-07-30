@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreateTaskModal } from "@/components/CreateTaskModal";
 import { TaskStatusSelect } from "@/components/TaskStatusSelect";
 import { DeleteTaskButton } from "@/components/DeleteTaskButton";
-import { EditTaskModal } from "@/components/EditTaskModal";
+import { TaskDetailsSheet } from "@/components/TaskDetailsSheet";
 import { CloseTaskButton } from "@/components/CloseTaskButton";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
@@ -169,7 +169,7 @@ export default async function AdminTasksPage() {
                       
                       {canManage && (
                         <>
-                          <EditTaskModal 
+                          <TaskDetailsSheet 
                             task={action} 
                             properties={properties || []} 
                             personnel={personnel || []} 
