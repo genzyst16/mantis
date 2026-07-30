@@ -25,12 +25,16 @@ export default async function DashboardPage() {
   const greetingName = profile?.full_name || user.email?.split('@')[0] || 'User';
 
   // 2. Fetch Recent Activity
-  const { data: recentActivity } = await supabase
+  const { data: recentActivity, error: recentError } = await supabase
     .from('inspection_reports')
     .select('id, reference_number, created_at, verification_status, checkpoints(checkpoint_name)')
-    .eq('inspected_by', user.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(3);
+    
+  if (recentError) {
+    console.error("Error fetching recent activity:", recentError);
+  }
 
   // 3. Fetch Today's Assignments
   const todayStart = new Date();
