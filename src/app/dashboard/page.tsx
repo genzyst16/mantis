@@ -76,6 +76,10 @@ export default async function DashboardPage() {
     .order('due_date', { ascending: true })
     .limit(5);
 
+  // 6. Check Admin Permissions
+  const userPerms = await getUserPermissions(supabase, user.id);
+  const hasAdminAccess = userPerms.is_super_admin || userPerms.permissions.length > 0;
+
   // 4b. Fetch User's Properties to find Unassigned Tasks
   const { data: myProperties } = await supabase
     .from('personnel_properties')
@@ -85,14 +89,19 @@ export default async function DashboardPage() {
   const propertyIds = myProperties?.map(p => p.property_id) || [];
 
   let unassignedTasks: any[] = [];
-  if (propertyIds.length > 0) {
-    const { data: ut } = await supabase
+  if (propertyIds.length > 0 || userPerms.is_super_admin) {
+    let query = supabase
       .from('corrective_actions')
       .select('id, finding_description, due_date, status, severity')
       .eq('status', 'Unassigned')
-      .in('property_id', propertyIds)
       .order('due_date', { ascending: true })
       .limit(5);
+      
+    if (!userPerms.is_super_admin) {
+      query = query.in('property_id', propertyIds);
+    }
+    
+    const { data: ut } = await query;
     unassignedTasks = ut || [];
   }
 
@@ -102,10 +111,6 @@ export default async function DashboardPage() {
     .select('id, property_name')
     .eq('is_active', true)
     .order('property_name');
-
-  // 6. Check Admin Permissions
-  const userPerms = await getUserPermissions(supabase, user.id);
-  const hasAdminAccess = userPerms.is_super_admin || userPerms.permissions.length > 0;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
