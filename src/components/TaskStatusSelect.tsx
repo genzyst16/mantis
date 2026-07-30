@@ -106,7 +106,7 @@ export function TaskStatusSelect({
           {STATUSES.map(status => {
             if (status === "Closed" && !canClose) return null;
             return (
-              <SelectItem key={status} value={status}>
+              <SelectItem key={status} value={status} label={status}>
                 {status}
               </SelectItem>
             );
@@ -128,9 +128,10 @@ export function TaskStatusSelect({
                   <SelectValue placeholder="Select personnel..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {personnel.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.full_name || p.email || "Unknown"}</SelectItem>
-                  ))}
+                  {personnel.map(p => {
+                    const name = p.full_name || p.email || "Unknown";
+                    return <SelectItem key={p.id} value={p.id} label={name}>{name}</SelectItem>
+                  })}
                 </SelectContent>
               </Select>
             </div>

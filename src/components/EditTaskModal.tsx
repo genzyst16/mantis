@@ -77,10 +77,10 @@ export function EditTaskModal({
                   <SelectValue placeholder="Select severity" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Critical">🔴 Critical</SelectItem>
-                  <SelectItem value="High">🟠 High</SelectItem>
-                  <SelectItem value="Medium">🟡 Medium</SelectItem>
-                  <SelectItem value="Low">🟢 Low</SelectItem>
+                  <SelectItem value="Low" label="Low">🟢 Low</SelectItem>
+                  <SelectItem value="Medium" label="Medium">🟡 Medium</SelectItem>
+                  <SelectItem value="High" label="High">🟠 High</SelectItem>
+                  <SelectItem value="Critical" label="Critical">🔴 Critical</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -101,9 +101,9 @@ export function EditTaskModal({
                   </span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— No Property —</SelectItem>
+                  <SelectItem value="none" label="— No Property —">— No Property —</SelectItem>
                   {properties?.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.property_name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id} label={p.property_name}>{p.property_name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -123,10 +123,11 @@ export function EditTaskModal({
                   </span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">— Leave Unassigned —</SelectItem>
-                  {personnel?.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.full_name || p.email || "Unknown"}</SelectItem>
-                  ))}
+                  <SelectItem value="unassigned" label="— Leave Unassigned —">— Leave Unassigned —</SelectItem>
+                  {personnel?.map((p: any) => {
+                    const name = p.full_name || p.email || "Unknown";
+                    return <SelectItem key={p.id} value={p.id} label={name}>{name}</SelectItem>
+                  })}
                 </SelectContent>
               </Select>
             </div>
