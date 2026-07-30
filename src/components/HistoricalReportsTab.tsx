@@ -73,8 +73,17 @@ export function HistoricalReportsTab() {
     return Array.from(keys).sort(); // Sort alphabetically
   }, [reports]);
 
+  const templateFields = useMemo(() => {
+    if (reports.length > 0 && reports[0].checkpoints?.inspection_templates?.inspection_template_fields) {
+      return reports[0].checkpoints.inspection_templates.inspection_template_fields;
+    }
+    return [];
+  }, [reports]);
+
   const formatKeyToLabel = (key: string) => {
-    return key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const field = templateFields.find((f: any) => f.field_key === key);
+    if (field && field.field_label) return field.field_label;
+    return key.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
   const getStatusBadge = (status: string) => {
@@ -219,11 +228,23 @@ export function HistoricalReportsTab() {
                         {getStatusBadge(report.verification_status)}
                       </TableCell>
                       
-                      {dynamicColumns.map(col => (
-                        <TableCell key={col} className="whitespace-nowrap font-medium text-slate-700 dark:text-slate-300">
-                          {valuesMap[col] || <span className="text-slate-300 dark:text-slate-700">-</span>}
-                        </TableCell>
-                      ))}
+                      {dynamicColumns.map(col => {
+                        const fieldDef = templateFields.find((f: any) => f.field_key === col);
+                        const isPhoto = fieldDef?.field_type === 'photo';
+                        const val = valuesMap[col];
+                        
+                        return (
+                          <TableCell key={col} className="whitespace-nowrap font-medium text-slate-700 dark:text-slate-300">
+                            {isPhoto && val ? (
+                              <div className="rounded overflow-hidden w-12 h-12 bg-black flex items-center justify-center">
+                                <img src={val} alt="Photo" className="w-full h-full object-cover" />
+                              </div>
+                            ) : (
+                              val || <span className="text-slate-300 dark:text-slate-700">-</span>
+                            )}
+                          </TableCell>
+                        );
+                      })}
                       
                       <TableCell className="text-right">
                         <ReportDetailsModal reportId={report.id} referenceNumber={report.reference_number} />

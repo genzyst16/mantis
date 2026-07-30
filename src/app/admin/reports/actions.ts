@@ -8,7 +8,12 @@ export async function getReportDetails(reportId: string) {
     .from("inspection_reports")
     .select(`
       *,
-      checkpoints(checkpoint_name),
+      checkpoints(
+        checkpoint_name,
+        inspection_templates(
+          inspection_template_fields(field_key, field_label, field_type)
+        )
+      ),
       profiles(full_name, email),
       properties(property_name),
       inspection_values(*)
@@ -49,7 +54,12 @@ export async function getCheckpointHistory(checkpointId: string, startDate?: str
       created_at,
       verification_status,
       profiles(full_name, email),
-      inspection_values(field_key, text_value, numeric_value, boolean_value)
+      inspection_values(field_key, text_value, numeric_value, boolean_value),
+      checkpoints(
+        inspection_templates(
+          inspection_template_fields(field_key, field_label, field_type)
+        )
+      )
     `)
     .eq("checkpoint_id", checkpointId);
 

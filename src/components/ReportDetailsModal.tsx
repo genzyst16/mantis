@@ -88,12 +88,24 @@ export function ReportDetailsModal({ reportId, referenceNumber }: { reportId: st
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {report.inspection_values.map((val: any) => {
+                    const templateFields = report.checkpoints?.inspection_templates?.inspection_template_fields || [];
+                    const fieldDef = templateFields.find((f: any) => f.field_key === val.field_key);
+                    
+                    const label = fieldDef?.field_label || val.field_key.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    const isPhoto = fieldDef?.field_type === "photo";
+                    
                     const displayValue = val.text_value ?? val.numeric_value ?? (val.boolean_value !== null ? (val.boolean_value ? "Yes" : "No") : "N/A");
-                    const label = val.field_key.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    
                     return (
                       <div key={val.id} className="bg-white dark:bg-slate-950 p-3 rounded border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <p className="text-xs text-slate-500 mb-1">{label}</p>
-                        <p className="font-medium">{displayValue}</p>
+                        <p className="text-xs text-slate-500 mb-2">{label}</p>
+                        {isPhoto && val.text_value ? (
+                          <div className="rounded overflow-hidden">
+                            <img src={val.text_value} alt={label} className="w-full h-auto max-h-48 object-contain bg-black rounded" />
+                          </div>
+                        ) : (
+                          <p className="font-medium">{displayValue}</p>
+                        )}
                       </div>
                     );
                   })}
