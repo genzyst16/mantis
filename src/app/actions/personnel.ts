@@ -12,20 +12,24 @@ export async function updatePersonnel(userId: string, data: {
   access_level?: string;
   propertyIds?: string[];
 }) {
-  const supabase = await createServerClient();
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  
   const { propertyIds, ...profileData } = data;
-  const { error } = await supabase.from("profiles").update(profileData).eq("id", userId);
+  const { error } = await supabaseAdmin.from("profiles").update(profileData).eq("id", userId);
   
   if (error) return { error: error.message };
 
   if (data.propertyIds !== undefined) {
     // Delete existing properties
-    await supabase.from("personnel_properties").delete().eq("user_id", userId);
+    await supabaseAdmin.from("personnel_properties").delete().eq("user_id", userId);
     
     // Insert new properties
     if (data.propertyIds.length > 0) {
       const inserts = data.propertyIds.map(pid => ({ user_id: userId, property_id: pid }));
-      await supabase.from("personnel_properties").insert(inserts);
+      await supabaseAdmin.from("personnel_properties").insert(inserts);
     }
   }
 
@@ -133,4 +137,31 @@ export async function deletePersonnel(userId: string) {
 
   revalidatePath("/admin/personnel");
   return { success: true };
+}
+
+export async function resetUserPassword(userId: string) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { error: "Missing SUPABASE_SERVICE_ROLE_KEY" };
+  }
+  
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  
+  const tempPassword = "TempPass123!";
+  
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    password: tempPassword
+  });
+  
+  if (authError) return { error: authError.message };
+  
+  const { error: profileError } = await supabaseAdmin.from("profiles").update({
+    force_password_change: true
+  }).eq("id", userId);
+  
+  if (profileError) return { error: profileError.message };
+  
+  return { success: true, tempPassword };
 }

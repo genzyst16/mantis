@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Loader2, Pencil, ChevronDown } from "lucide-react";
-import { updatePersonnel } from "@/app/actions/personnel";
+import { Loader2, Pencil, ChevronDown, KeyRound } from "lucide-react";
+import { updatePersonnel, resetUserPassword } from "@/app/actions/personnel";
 
 const ACCESS_LEVEL_OPTIONS = [
   { value: "dashboard", label: "Dashboard Only" },
@@ -20,6 +20,7 @@ const ACCESS_LEVEL_OPTIONS = [
 export function EditPersonnelModal({ user, roles, properties }: { user: any; roles: any[]; properties: any[] }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   
   const [empNum, setEmpNum] = useState(user.employee_number || "");
   const [roleId, setRoleId] = useState(user.role_id || "");
@@ -52,6 +53,18 @@ export function EditPersonnelModal({ user, roles, properties }: { user: any; rol
       setOpen(false);
     }
     setIsSubmitting(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!confirm(`Are you sure you want to reset the password for ${user.full_name}?`)) return;
+    setIsResetting(true);
+    const result = await resetUserPassword(user.id);
+    setIsResetting(false);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      alert(`Password successfully reset!\n\nTemporary Password: ${result.tempPassword}\n\nThe user will be forced to change this upon logging in.`);
+    }
   };
 
   return (
@@ -156,10 +169,22 @@ export function EditPersonnelModal({ user, roles, properties }: { user: any; rol
             </Select>
           </div>
           
-          <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isSubmitting}>
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Save Changes
-          </Button>
+          <div className="flex gap-2 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-1/3 text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200" 
+              onClick={handleResetPassword}
+              disabled={isResetting || isSubmitting}
+            >
+              {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+              Reset Pass
+            </Button>
+            <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700" disabled={isSubmitting || isResetting}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Save Changes
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
