@@ -6,8 +6,6 @@ import { CreateTaskModal } from "@/components/CreateTaskModal";
 import { TaskStatusSelect } from "@/components/TaskStatusSelect";
 import { DeleteTaskButton } from "@/components/DeleteTaskButton";
 import { EditTaskModal } from "@/components/EditTaskModal";
-
-export const dynamic = "force-dynamic";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
