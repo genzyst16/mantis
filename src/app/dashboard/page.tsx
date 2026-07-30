@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QrCode, Clock, CheckCircle, AlertTriangle, Activity, ClipboardList, MapPin } from 'lucide-react';
 import { PushSubscriptionButton } from '@/components/PushSubscriptionButton';
+import { FileTaskModal } from '@/components/FileTaskModal';
 import { getUserPermissions } from '@/lib/permissions';
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
@@ -75,7 +76,14 @@ export default async function DashboardPage() {
     .order('due_date', { ascending: true })
     .limit(5);
 
-  // 5. Check Admin Permissions
+  // 5. Fetch Properties for File Task Modal
+  const { data: properties } = await supabase
+    .from('properties')
+    .select('id, property_name')
+    .eq('is_active', true)
+    .order('property_name');
+
+  // 6. Check Admin Permissions
   const userPerms = await getUserPermissions(supabase, user.id);
   const hasAdminAccess = userPerms.is_super_admin || userPerms.permissions.length > 0;
 
@@ -123,12 +131,15 @@ export default async function DashboardPage() {
       {/* Task List */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-emerald-600" /> My Tasks
-          </h3>
-          <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded-full font-medium">
-            {myTasks?.length || 0} Open
-          </span>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-emerald-600" /> My Tasks
+            </h3>
+            <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded-full font-medium ml-1">
+              {myTasks?.length || 0} Open
+            </span>
+          </div>
+          <FileTaskModal properties={properties || []} currentUserId={user.id} />
         </div>
         <div className="space-y-3">
           {!myTasks || myTasks.length === 0 ? (
