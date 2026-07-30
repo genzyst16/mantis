@@ -13,28 +13,45 @@ type ActivityItem = {
   status: string;
 };
 
-export default async function HistoryPage() {
+import { HistoryDateFilter } from '@/components/HistoryDateFilter';
+
+export default async function HistoryPage(
+  props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
+) {
+  const searchParams = await props.searchParams;
+  const fromDate = typeof searchParams.from === "string" ? searchParams.from : null;
+  const toDate = typeof searchParams.to === "string" ? searchParams.to : null;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return null;
 
   // Fetch Inspections
-  const { data: reports } = await supabase
+  let reportsQuery = supabase
     .from('inspection_reports')
     .select('id, reference_number, created_at, verification_status, checkpoints(checkpoint_name)')
-    .eq('inspected_by', user.id)
-    .order('created_at', { ascending: false })
-    .limit(30);
+    .eq('user_id', user.id); // Fixed from 'inspected_by' to 'user_id'
 
-  // Fetch Completed Tasks
-  const { data: tasks } = await supabase
-    .from('corrective_actions')
-    .select('id, finding_description, status, completed_at, created_at, checkpoints(checkpoint_name)')
-    .eq('assigned_user_id', user.id)
-    .in('status', ['Closed', 'Resolved', 'In Progress']) // Show active and closed ones that they interacted with
+  if (fromDate) reportsQuery = reportsQuery.gte('created_at', fromDate);
+  if (toDate) reportsQuery = reportsQuery.lte('created_at', `${toDate}T23:59:59.999Z`);
+
+  const { data: reports } = await reportsQuery
     .order('created_at', { ascending: false })
-    .limit(30);
+    .limit(fromDate || toDate ? 1000 : 30);
+
+  // Fetch Completed, Filed, and Endorsed Tasks
+  let tasksQuery = supabase
+    .from('corrective_actions')
+    .select('id, finding_description, status, completed_at, created_at, created_by, assigned_user_id, properties(property_name)')
+    .or(`assigned_user_id.eq.${user.id},created_by.eq.${user.id}`);
+
+  if (fromDate) tasksQuery = tasksQuery.gte('created_at', fromDate);
+  if (toDate) tasksQuery = tasksQuery.lte('created_at', `${toDate}T23:59:59.999Z`);
+
+  const { data: tasks } = await tasksQuery
+    .order('created_at', { ascending: false })
+    .limit(fromDate || toDate ? 1000 : 30);
 
   // Unified List
   const activities: ActivityItem[] = [];
@@ -55,13 +72,18 @@ export default async function HistoryPage() {
 
   if (tasks) {
     tasks.forEach(t => {
-      const checkpoint = t.checkpoints as any;
+      const property = t.properties as any;
+      const isFiled = t.created_by === user.id && t.assigned_user_id !== user.id;
+      let subtitle = property?.property_name ? `At ${property.property_name}` : 'General Task';
+      if (isFiled) subtitle = `Filed by You • ${subtitle}`;
+      else subtitle = `Assigned to You • ${subtitle}`;
+
       activities.push({
         id: t.id,
         type: 'task',
         title: t.finding_description || 'Task',
-        subtitle: checkpoint?.checkpoint_name ? `At ${checkpoint.checkpoint_name}` : 'General Task',
-        date: new Date(t.completed_at || t.created_at),
+        subtitle: subtitle,
+        date: new Date(t.created_at),
         status: t.status
       });
     });
@@ -74,7 +96,8 @@ export default async function HistoryPage() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       <header>
         <h2 className="text-2xl font-bold text-slate-800">Activity History</h2>
-        <p className="text-slate-500 text-sm">Your recent inspections and tasks.</p>
+        <p className="text-slate-500 text-sm mb-6">Your recent inspections and tasks.</p>
+        <HistoryDateFilter />
       </header>
 
       {activities.length === 0 ? (
