@@ -15,6 +15,7 @@ export async function createCorrectiveAction(formData: FormData) {
   const property_id = property_id_raw && property_id_raw !== "none" ? property_id_raw : null;
   const assigned_user_id_raw = formData.get("assigned_user_id") as string;
   const assigned_user_id = assigned_user_id_raw && assigned_user_id_raw !== "unassigned" ? assigned_user_id_raw : null;
+  const status = formData.get("status") as string;
 
   if (!finding_description || !severity) {
     return { error: "Task title and severity are required." };
@@ -28,7 +29,7 @@ export async function createCorrectiveAction(formData: FormData) {
     property_id,
     assigned_user_id,
     created_by: user?.id || null,
-    status: assigned_user_id ? "Assigned" : "Unassigned",
+    status: status ? status : (assigned_user_id ? "Assigned" : "Unassigned"),
   });
 
   if (error) {

@@ -13,6 +13,8 @@ import { createCorrectiveAction } from "@/app/admin/tasks/actions";
 export function FileTaskModal({ properties, currentUserId }: { properties: any[], currentUserId: string }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [propertyId, setPropertyId] = useState("none");
+  const [status, setStatus] = useState("Pending");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -77,10 +79,30 @@ export function FileTaskModal({ properties, currentUserId }: { properties: any[]
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
+              <Select name="status" value={status} onValueChange={(val) => setStatus(val || "Pending")} required>
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Unassigned">Unassigned</SelectItem>
+                  <SelectItem value="Assigned">Assigned</SelectItem>
+                  <SelectItem value="On-going">On-going</SelectItem>
+                  <SelectItem value="Paused">Paused</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Endorsed">Endorsed</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="property_id">Property</Label>
-              <Select name="property_id" defaultValue="none">
+              <Select name="property_id" value={propertyId} onValueChange={(val) => setPropertyId(val || "none")}>
                 <SelectTrigger id="property_id">
-                  <SelectValue placeholder="Select Property" />
+                  <span className="truncate flex-1 text-left">
+                    {propertyId !== "none" ? properties?.find(p => p.id === propertyId)?.property_name : "— No Property —"}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— No Property —</SelectItem>
