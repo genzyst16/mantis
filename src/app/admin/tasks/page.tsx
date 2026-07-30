@@ -154,7 +154,13 @@ export default async function AdminTasksPage() {
                     <Label htmlFor="property_id">Property</Label>
                     <Select name="property_id" defaultValue="none">
                       <SelectTrigger id="property_id">
-                        <SelectValue placeholder="No Property" />
+                        <SelectValue placeholder="No Property">
+                          {(val: string | null) => {
+                            if (!val || val === "none") return "— No Property —";
+                            const p = properties?.find((prop: any) => prop.id === val);
+                            return p ? p.property_name : "— No Property —";
+                          }}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none" label="— No Property —">— No Property —</SelectItem>
@@ -169,7 +175,13 @@ export default async function AdminTasksPage() {
                     <Label htmlFor="assigned_user_id">Assign To</Label>
                     <Select name="assigned_user_id" defaultValue="unassigned">
                       <SelectTrigger id="assigned_user_id">
-                        <SelectValue placeholder="Leave Unassigned" />
+                        <SelectValue placeholder="Leave Unassigned">
+                          {(val: string | null) => {
+                            if (!val || val === "unassigned") return "— Leave Unassigned —";
+                            const p = personnel?.find((user: any) => user.id === val);
+                            return p ? (p.full_name || p.email || "Unknown") : "— Leave Unassigned —";
+                          }}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned" label="— Leave Unassigned —">— Leave Unassigned —</SelectItem>

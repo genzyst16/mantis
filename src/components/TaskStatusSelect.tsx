@@ -125,7 +125,13 @@ export function TaskStatusSelect({
               <Label>Select New Assignee</Label>
               <Select value={selectedAssignee} onValueChange={(val) => val && setSelectedAssignee(val)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select personnel..." />
+                  <SelectValue placeholder="Select personnel...">
+                    {(val: string | null) => {
+                      if (!val) return "Select personnel...";
+                      const p = personnel.find((user) => user.id === val);
+                      return p ? (p.full_name || p.email || "Unknown") : "Select personnel...";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {personnel.map(p => {
