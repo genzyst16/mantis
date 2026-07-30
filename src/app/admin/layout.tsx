@@ -10,6 +10,7 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { AdminSidebarNav } from '@/components/AdminSidebarNav';
+import Image from 'next/image';
 
 export default async function AdminLayout({
   children,
@@ -53,9 +54,10 @@ export default async function AdminLayout({
                     <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                     <div className="flex flex-col h-full overflow-hidden">
                       <div className="p-4 border-b border-slate-800 shrink-0">
-                        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="text-emerald-500">MANTIS</span> Admin
-                        </h1>
+                        <div className="flex items-center gap-2">
+                          <Image src="/logo.png" alt="Mantis Logo" width={120} height={40} className="h-8 w-auto object-contain brightness-0 invert" />
+                          <span className="text-xl font-bold text-slate-300">Admin</span>
+                        </div>
                       </div>
                       <AdminSidebarNav />
                       <div className="p-4 border-t border-slate-800 shrink-0">
@@ -69,9 +71,10 @@ export default async function AdminLayout({
                   </SheetContent>
                 </Sheet>
               </div>
-              <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="text-emerald-600">MANTIS</span> Admin
-              </h1>
+              <div className="flex items-center gap-2">
+                <Image src="/logo.png" alt="Mantis Logo" width={120} height={40} className="h-8 w-auto object-contain" />
+                <span className="text-lg font-bold text-slate-500 hidden sm:inline-block">Admin</span>
+              </div>
             </div>
             
             {/* Spacer for desktop */}

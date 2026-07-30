@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LogOut, QrCode, History, User } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
@@ -24,8 +25,10 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       {/* Mobile-first Header */}
-      <header className="bg-white dark:bg-slate-900 border-b p-4 sticky top-0 z-10 flex justify-between items-center shadow-sm">
-        <h1 className="text-xl font-bold text-emerald-700 dark:text-emerald-500">MANTIS</h1>
+      <header className="bg-white dark:bg-slate-900 border-b p-4 sticky top-0 z-10 flex justify-between items-center shadow-sm h-16">
+        <div className="flex items-center">
+          <Image src="/logo.png" alt="Mantis Logo" width={100} height={32} className="h-8 w-auto object-contain" />
+        </div>
         <form action="/auth/signout" method="post">
           <Button variant="ghost" size="icon" type="submit" title="Sign Out">
             <LogOut className="h-5 w-5 text-slate-500" />

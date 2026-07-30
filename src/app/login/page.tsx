@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BugIcon, Loader2 } from "lucide-react"; 
+import { Loader2 } from "lucide-react"; 
 import { useFormStatus } from "react-dom";
+import Image from "next/image";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -50,10 +51,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4 text-emerald-600 dark:text-emerald-500">
-            <BugIcon size={48} />
+          <div className="flex justify-center mb-4">
+            <Image src="/logo.png" alt="Mantis Logo" width={200} height={60} className="h-16 w-auto object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">MANTIS</CardTitle>
           <CardDescription>
             Maintenance Audit, Notification, Tracking & Inspection System
           </CardDescription>
