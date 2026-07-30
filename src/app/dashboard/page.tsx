@@ -76,6 +76,26 @@ export default async function DashboardPage() {
     .order('due_date', { ascending: true })
     .limit(5);
 
+  // 4b. Fetch User's Properties to find Unassigned Tasks
+  const { data: myProperties } = await supabase
+    .from('personnel_properties')
+    .select('property_id')
+    .eq('user_id', user.id);
+
+  const propertyIds = myProperties?.map(p => p.property_id) || [];
+
+  let unassignedTasks: any[] = [];
+  if (propertyIds.length > 0) {
+    const { data: ut } = await supabase
+      .from('corrective_actions')
+      .select('id, finding_description, due_date, status, severity')
+      .eq('status', 'Unassigned')
+      .in('property_id', propertyIds)
+      .order('due_date', { ascending: true })
+      .limit(5);
+    unassignedTasks = ut || [];
+  }
+
   // 5. Fetch Properties for File Task Modal
   const { data: properties } = await supabase
     .from('properties')
@@ -142,42 +162,85 @@ export default async function DashboardPage() {
           <FileTaskModal properties={properties || []} currentUserId={user.id} />
         </div>
         <div className="space-y-3">
-          {!myTasks || myTasks.length === 0 ? (
-            <div className="text-center py-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-              <p className="text-sm text-slate-500">You have no pending tasks! 🎉</p>
-            </div>
-          ) : (
-            myTasks.map((task) => (
-              <Link key={task.id} href={`/dashboard/tasks/${task.id}`} className="block">
-                <Card className="border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:border-emerald-300 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <h4 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{task.finding_description}</h4>
-                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No date'}</span>
-                          <span className="font-semibold text-emerald-600">{task.status}</span>
-                        </div>
-                      </div>
-                      <div className="shrink-0">
-                        <span className={`text-xs px-2 py-1 rounded-md font-medium ${
-                          task.severity === 'High' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                          task.severity === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        }`}>
-                          {task.severity}
-                        </span>
-                      </div>
+                 </div>
+
+        {(!myTasks || myTasks.length === 0) ? (
+          <Card className="border-dashed shadow-none bg-slate-50">
+            <CardContent className="flex flex-col items-center justify-center py-10 text-slate-400">
+              <CheckCircle className="h-10 w-10 mb-3 text-slate-300" />
+              <p>You have no active tasks.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {myTasks.map((t) => (
+              <Link href={`/dashboard/tasks/${t.id}`} key={t.id} className="block group">
+                <Card className="group-hover:border-emerald-500 transition-colors">
+                  <CardContent className="p-4 flex justify-between items-center">
+                    <div>
+                      <h4 className="font-semibold text-slate-800">{t.finding_description}</h4>
+                      <p className="text-sm text-slate-500">
+                        {t.status} • {t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Due Date'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-md font-bold uppercase ${
+                        t.severity === 'High' ? 'bg-red-100 text-red-700' :
+                        t.severity === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {t.severity}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Assignment List */}
+      {/* Unassigned Tasks */}
+      {unassignedTasks.length > 0 && (
+        <section>
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <ClipboardList className="mr-2 h-5 w-5 text-amber-600" />
+                Unassigned Tasks
+              </h3>
+              <p className="text-slate-500 text-sm">Open tasks in your properties.</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {unassignedTasks.map((t) => (
+              <Link href={`/dashboard/tasks/${t.id}`} key={t.id} className="block group">
+                <Card className="group-hover:border-amber-500 transition-colors border-dashed bg-amber-50/30">
+                  <CardContent className="p-4 flex justify-between items-center">
+                    <div>
+                      <h4 className="font-semibold text-slate-800">{t.finding_description}</h4>
+                      <p className="text-sm text-amber-600 font-medium flex items-center gap-1.5 mt-0.5">
+                        {t.status} • {t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No Due Date'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-md font-bold uppercase ${
+                        t.severity === 'High' ? 'bg-red-100 text-red-700' :
+                        t.severity === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {t.severity}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Today's Schedule Section */} {/* Assignment List */}
       <section>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">

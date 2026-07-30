@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ChevronLeft, Camera, Send, MapPin, Clock } from "lucide-react";
-import { updateActionStatus, endorseAction } from "@/app/admin/tasks/actions";
+import { updateActionStatus, endorseAction, takeTaskAction } from "@/app/admin/tasks/actions";
 import Link from "next/link";
 
 export function ClientTaskDetails({ task, personnel, currentUserId }: { task: any; personnel: any[]; currentUserId: string }) {
@@ -40,6 +40,14 @@ export function ClientTaskDetails({ task, personnel, currentUserId }: { task: an
     startTransition(async () => {
       await updateActionStatus(task.id, newStatus);
       setActiveStatus(newStatus);
+    });
+  };
+
+  const handleTakeTask = () => {
+    startTransition(async () => {
+      await takeTaskAction(task.id);
+      setActiveStatus("Assigned");
+      router.push("/dashboard");
     });
   };
 
@@ -119,7 +127,15 @@ export function ClientTaskDetails({ task, personnel, currentUserId }: { task: an
           {/* Status Updater */}
           <div className="pt-4">
             <Label className="text-xs text-slate-500 uppercase mb-2 block">Current Status</Label>
-            {activeStatus === "Completed" || activeStatus === "Closed" ? (
+            {activeStatus === "Unassigned" ? (
+              <Button 
+                onClick={handleTakeTask} 
+                disabled={isPending} 
+                className="w-full h-14 bg-amber-600 hover:bg-amber-700 text-white text-base font-bold rounded-xl shadow-md"
+              >
+                {isPending ? "Taking Task..." : "Take Task"}
+              </Button>
+            ) : activeStatus === "Completed" || activeStatus === "Closed" ? (
               <div className="w-full h-12 flex items-center justify-center bg-emerald-500 text-white font-bold rounded-xl shadow-md">
                 {activeStatus}
               </div>

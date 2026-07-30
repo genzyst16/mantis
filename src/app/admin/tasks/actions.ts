@@ -143,3 +143,26 @@ export async function deleteTask(actionId: string) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+export async function takeTaskAction(taskId: string) {
+  const supabase = createAdminClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("corrective_actions")
+    .update({ 
+      assigned_user_id: user.id,
+      status: "Assigned"
+    })
+    .eq("id", taskId)
+    .eq("status", "Unassigned");
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/tasks/${taskId}`);
+  return { success: true };
+}
