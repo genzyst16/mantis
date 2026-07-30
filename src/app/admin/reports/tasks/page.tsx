@@ -22,7 +22,7 @@ export default async function AdminTasksReportPage(props: { searchParams: Promis
   const statusFilter = searchParams.status || "all";
   
   let query = supabase
-    .from("tasks")
+    .from("corrective_actions")
     .select(`
       *,
       properties(property_name),
