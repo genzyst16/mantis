@@ -99,19 +99,17 @@ export function LivePhotoCapture({ fieldKey, onPhotoCaptured, label }: LivePhoto
         </Button>
       )}
 
-      {isActive && (
-        <div className="relative rounded-md overflow-hidden aspect-video bg-black flex flex-col">
-          <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-            <Button type="button" onClick={capturePhoto} className="rounded-full h-14 w-14 border-4 border-white bg-transparent hover:bg-white/20 p-0 shadow-lg">
-               <span className="sr-only">Capture</span>
-            </Button>
-          </div>
-          <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-white bg-black/40 hover:bg-black/60 rounded-full" onClick={stopCamera}>
-            <X className="h-5 w-5" />
+      <div className={isActive ? "relative rounded-md overflow-hidden aspect-video bg-black flex flex-col" : "hidden"}>
+        <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+          <Button type="button" onClick={capturePhoto} className="rounded-full h-14 w-14 border-4 border-white bg-transparent hover:bg-white/20 p-0 shadow-lg">
+             <span className="sr-only">Capture</span>
           </Button>
         </div>
-      )}
+        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-white bg-black/40 hover:bg-black/60 rounded-full" onClick={stopCamera}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
 
       {photoData && (
         <div className="relative rounded-md overflow-hidden">
