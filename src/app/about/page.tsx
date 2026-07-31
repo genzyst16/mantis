@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Info, Code, Calendar, MonitorPlay, Layers, Cpu } from "lucide-react";
+import { Info, Code, Calendar, MonitorPlay, Layers, Cpu, Building2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -64,6 +64,13 @@ export default function AboutPage() {
                     <Cpu className="h-4 w-4" /> Developed For
                   </div>
                   <p className="text-slate-800 dark:text-slate-200 font-medium">Property Management and Engineering Group</p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1">
+                    <Building2 className="h-4 w-4" /> Owner
+                  </div>
+                  <p className="text-slate-800 dark:text-slate-200 font-medium">H Hospitality Group Corporation - IT Group</p>
                 </div>
               </div>
 
