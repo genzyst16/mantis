@@ -20,13 +20,18 @@ export function DeletePersonnelModal({ user }: { user: any }) {
 
   const handleDelete = async () => {
     setIsSubmitting(true);
-    const result = await deletePersonnel(user.id);
+    try {
+      const result = await deletePersonnel(user.id);
 
-    if (result.error) {
-      alert(result.error);
-      setIsSubmitting(false);
-    } else {
-      setOpen(false);
+      if (result && (result as any).error) {
+        alert(typeof (result as any).error === 'object' ? JSON.stringify((result as any).error) : String((result as any).error));
+        setIsSubmitting(false);
+      } else {
+        setOpen(false);
+        setIsSubmitting(false);
+      }
+    } catch (e: any) {
+      alert(`Client-side Exception: ${e.message || JSON.stringify(e)}`);
       setIsSubmitting(false);
     }
   };
