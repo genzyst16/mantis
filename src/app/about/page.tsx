@@ -63,7 +63,7 @@ export default function AboutPage() {
                   <div className="flex items-center gap-2 text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1">
                     <Cpu className="h-4 w-4" /> Developed For
                   </div>
-                  <p className="text-slate-800 dark:text-slate-200 font-medium">The Management Team</p>
+                  <p className="text-slate-800 dark:text-slate-200 font-medium">Property Management and Engineering Group</p>
                 </div>
               </div>
 
