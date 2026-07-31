@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AddPropertyModal } from "@/components/AddPropertyModal";
+import { EditPropertyModal } from "@/components/EditPropertyModal";
+import { DeletePropertyButton } from "@/components/DeletePropertyButton";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
 
 export default async function AdminPropertiesPage() {
@@ -13,6 +15,8 @@ export default async function AdminPropertiesPage() {
 
   const userPerms = await getUserPermissions(supabase, user.id);
   const canCreate = hasPermission(userPerms, "properties.create");
+  const canEdit = hasPermission(userPerms, "properties.edit");
+  const canDelete = hasPermission(userPerms, "properties.delete");
   
   const { data: properties } = await supabase
     .from("properties")
@@ -40,12 +44,13 @@ export default async function AdminPropertiesPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Areas</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(!properties || properties.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-6">
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-6">
                     No properties found.
                   </TableCell>
                 </TableRow>
@@ -57,6 +62,12 @@ export default async function AdminPropertiesPage() {
                   <TableCell>{prop.maintenance_areas?.[0]?.count || 0}</TableCell>
                   <TableCell>
                     {prop.is_active ? <Badge className="bg-emerald-100 text-emerald-800">Active</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {canEdit && <EditPropertyModal property={prop} />}
+                      {canDelete && <DeletePropertyButton property={prop} />}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

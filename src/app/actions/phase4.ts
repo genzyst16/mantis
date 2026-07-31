@@ -14,6 +14,26 @@ export async function addProperty(propertyName: string, propertyCode: string) {
   return { success: true };
 }
 
+export async function updateProperty(id: string, propertyName: string, propertyCode: string, isActive: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("properties").update({
+    property_name: propertyName,
+    property_code: propertyCode,
+    is_active: isActive
+  }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/properties");
+  return { success: true };
+}
+
+export async function deleteProperty(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("properties").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/properties");
+  return { success: true };
+}
+
 export async function addEquipment(data: {
   equipment_code: string;
   equipment_name: string;
