@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building, FileCode, MapPin, ListTree, Map, Clock, FileText, Wrench, Settings, Users, Activity, Shield } from "lucide-react";
+import { LayoutDashboard, Building, FileCode, MapPin, ListTree, Map, Clock, FileText, Wrench, Settings, Users, Activity, Shield, BookOpen, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_GROUPS = [
@@ -37,6 +37,13 @@ const NAV_GROUPS = [
       { href: "/admin/personnel", label: "Users", icon: Users },
       { href: "/admin/roles", label: "Roles", icon: Shield },
       { href: "/admin/audit-logs", label: "Audit Logs", icon: Activity },
+    ]
+  },
+  {
+    title: "Help & Info",
+    items: [
+      { href: "/help", label: "Help & Guides", icon: BookOpen },
+      { href: "/about", label: "Documentation", icon: Info },
     ]
   }
 ];

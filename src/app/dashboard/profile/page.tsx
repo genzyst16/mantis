@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Shield, BellRing, KeyRound, LogOut, CheckCircle, ClipboardCheck } from 'lucide-react';
+import { User, Mail, Shield, BellRing, KeyRound, LogOut, CheckCircle, ClipboardCheck, BookOpen, Info } from 'lucide-react';
 import { PushSubscriptionButton } from '@/components/PushSubscriptionButton';
 import Link from 'next/link';
 
@@ -128,6 +128,36 @@ export default async function ProfilePage() {
               <div>
                 <p className="text-sm font-semibold text-slate-800">Change Password</p>
                 <p className="text-xs text-slate-500">Update your login credentials</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2 mt-6">Help & Support</h3>
+
+        <Link href="/help" className="block mb-3">
+          <Card className="shadow-sm border-slate-200 hover:bg-slate-50 transition-colors">
+            <div className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Help & Guides</p>
+                <p className="text-xs text-slate-500">Learn how to use the system</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/about" className="block">
+          <Card className="shadow-sm border-slate-200 hover:bg-slate-50 transition-colors">
+            <div className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+                <Info className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Documentation</p>
+                <p className="text-xs text-slate-500">System info & version details</p>
               </div>
             </div>
           </Card>
