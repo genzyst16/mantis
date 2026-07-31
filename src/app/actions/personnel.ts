@@ -134,7 +134,7 @@ export async function deletePersonnel(userId: string) {
       return { error: "Cannot delete a Super Admin account." };
     }
 
-    // Workaround: Clear created_by on inspection_templates to prevent Foreign Key constraint violation
+    // Workaround 1: Clear created_by on inspection_templates to prevent Foreign Key constraint violation
     const { error: updateError } = await supabaseAdmin
       .from("inspection_templates")
       .update({ created_by: null })
@@ -144,17 +144,26 @@ export async function deletePersonnel(userId: string) {
       return { error: `Failed to clear inspection templates: ${updateError.message}` };
     }
 
+    // Workaround 2: GoTrue sometimes throws a 500 AuthRetryableFetchError when cascade-deleting 
+    // a user that has complex triggers (like our audit logs). Deleting the profile explicitly 
+    // first bypasses this issue.
+    const { error: profileDeleteError } = await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+      
+    if (profileDeleteError) {
+      return { error: `Failed to delete user profile: ${profileDeleteError.message || JSON.stringify(profileDeleteError)}` };
+    }
+
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
     
     if (deleteError) {
       console.error("Error deleting user:", deleteError);
       
-      let safeMessage = "Unknown delete error";
-      if (deleteError.message) {
-        safeMessage = typeof deleteError.message === 'string' ? deleteError.message : JSON.stringify(deleteError.message);
-      } else {
-        safeMessage = JSON.stringify(deleteError);
-      }
+      const safeMessage = typeof deleteError === 'object' && deleteError !== null
+        ? JSON.stringify(deleteError, Object.getOwnPropertyNames(deleteError))
+        : String(deleteError);
       
       return { error: `Failed to delete user: ${safeMessage}` };
     }
