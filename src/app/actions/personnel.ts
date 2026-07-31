@@ -113,38 +113,50 @@ export async function enrollPersonnel(data: {
 }
 
 export async function deletePersonnel(userId: string) {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return { error: "Missing SUPABASE_SERVICE_ROLE_KEY to delete users." };
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return { error: "Missing SUPABASE_SERVICE_ROLE_KEY to delete users." };
+    }
+
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    // Prevent deleting super admins
+    const { data: profile, error: profileError } = await supabaseAdmin.from("profiles").select("is_super_admin").eq("id", userId).single();
+    
+    if (profileError) {
+      return { error: `Failed to fetch profile: ${profileError.message}` };
+    }
+    if (profile?.is_super_admin) {
+      return { error: "Cannot delete a Super Admin account." };
+    }
+
+    // Workaround: Clear created_by on inspection_templates to prevent Foreign Key constraint violation
+    const { error: updateError } = await supabaseAdmin
+      .from("inspection_templates")
+      .update({ created_by: null })
+      .eq("created_by", userId);
+
+    if (updateError) {
+      return { error: `Failed to clear inspection templates: ${updateError.message}` };
+    }
+
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    
+    if (deleteError) {
+      console.error("Error deleting user:", deleteError);
+      return { error: deleteError.message || "Failed to delete user from Supabase Auth." };
+    }
+
+    revalidatePath("/admin/personnel");
+    return { success: true };
+  } catch (e: any) {
+    console.error("Unhandled exception in deletePersonnel:", e);
+    return { error: e instanceof Error ? e.message : String(e) };
   }
-
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-
-  // Prevent deleting super admins
-  const { data: profile } = await supabaseAdmin.from("profiles").select("is_super_admin").eq("id", userId).single();
-  if (profile?.is_super_admin) {
-    return { error: "Cannot delete a Super Admin account." };
-  }
-
-  // Workaround: Clear created_by on inspection_templates to prevent Foreign Key constraint violation
-  // because the migration didn't add ON DELETE SET NULL to this specific column.
-  await supabaseAdmin
-    .from("inspection_templates")
-    .update({ created_by: null })
-    .eq("created_by", userId);
-
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-  
-  if (error) {
-    console.error("Error deleting user:", error);
-    return { error: error.message || JSON.stringify(error) || "An unknown error occurred while deleting the user." };
-  }
-
-  revalidatePath("/admin/personnel");
-  return { success: true };
 }
 
 export async function resetUserPassword(userId: string) {
