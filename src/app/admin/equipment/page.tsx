@@ -5,9 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Activity } from "lucide-react";
 import { AddEquipmentModal } from "@/components/AddEquipmentModal";
+import { getUserPermissions, hasPermission } from "@/lib/permissions";
 
 export default async function AdminEquipmentPage() {
   const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userPerms = await getUserPermissions(supabase, user.id);
+  const canCreate = hasPermission(userPerms, "equipment.create");
   
   const { data: equipmentList } = await supabase
     .from("equipment")
@@ -21,7 +28,9 @@ export default async function AdminEquipmentPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Equipment Registry</h2>
-        <AddEquipmentModal properties={properties || []} categories={categories || []} />
+        {canCreate && (
+          <AddEquipmentModal properties={properties || []} categories={categories || []} />
+        )}
       </div>
 
       <Card>

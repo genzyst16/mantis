@@ -33,7 +33,9 @@ export default async function AdminTasksPage() {
     );
   }
 
-  const canManage = hasPermission(userPerms, "tasks.manage");
+  const canCreate = hasPermission(userPerms, "tasks.create");
+  const canEdit = hasPermission(userPerms, "tasks.edit");
+  const canDelete = hasPermission(userPerms, "tasks.delete");
   const canCloseGeneral = hasPermission(userPerms, "tasks.close") || userPerms.is_super_admin;
 
   const rolesData: any = currentUserProfile?.roles;
@@ -87,9 +89,9 @@ export default async function AdminTasksPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tasks</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tasks Management</h2>
         
-        {canManage && (
+        {canCreate && (
           <CreateTaskModal properties={properties || []} personnel={personnel || []} />
         )}
       </div>
@@ -167,15 +169,13 @@ export default async function AdminTasksPage() {
                         canClose={canCloseGeneral || action.created_by === user.id} 
                       />
                       
-                      {canManage && (
-                        <>
-                          <TaskDetailsSheet 
-                            task={action} 
-                            properties={properties || []} 
-                            personnel={personnel || []} 
-                          />
-                          <DeleteTaskButton taskId={action.id} taskTitle={action.finding_description} />
-                        </>
+                      <TaskDetailsSheet 
+                        task={action} 
+                        properties={properties || []} 
+                        personnel={personnel || []} 
+                      />
+                      {canDelete && (
+                        <DeleteTaskButton taskId={action.id} taskTitle={action.finding_description} />
                       )}
                     </div>
                   </TableCell>

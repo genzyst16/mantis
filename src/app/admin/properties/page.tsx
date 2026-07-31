@@ -3,9 +3,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AddPropertyModal } from "@/components/AddPropertyModal";
+import { getUserPermissions, hasPermission } from "@/lib/permissions";
 
 export default async function AdminPropertiesPage() {
   const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userPerms = await getUserPermissions(supabase, user.id);
+  const canCreate = hasPermission(userPerms, "properties.create");
   
   const { data: properties } = await supabase
     .from("properties")
@@ -16,7 +23,9 @@ export default async function AdminPropertiesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Properties</h2>
-        <AddPropertyModal />
+        {canCreate && (
+          <AddPropertyModal />
+        )}
       </div>
 
       <Card>
