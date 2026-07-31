@@ -148,14 +148,30 @@ export async function deletePersonnel(userId: string) {
     
     if (deleteError) {
       console.error("Error deleting user:", deleteError);
-      return { error: deleteError.message || "Failed to delete user from Supabase Auth." };
+      
+      let safeMessage = "Unknown delete error";
+      if (deleteError.message) {
+        safeMessage = typeof deleteError.message === 'string' ? deleteError.message : JSON.stringify(deleteError.message);
+      } else {
+        safeMessage = JSON.stringify(deleteError);
+      }
+      
+      return { error: `Failed to delete user: ${safeMessage}` };
     }
 
     revalidatePath("/admin/personnel");
     return { success: true };
   } catch (e: any) {
     console.error("Unhandled exception in deletePersonnel:", e);
-    return { error: e instanceof Error ? e.message : String(e) };
+    
+    let safeMessage = "Unknown exception";
+    if (e && e.message) {
+      safeMessage = typeof e.message === 'string' ? e.message : JSON.stringify(e.message);
+    } else if (e) {
+      safeMessage = JSON.stringify(e);
+    }
+    
+    return { error: `Exception: ${safeMessage}` };
   }
 }
 
