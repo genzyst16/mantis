@@ -27,5 +27,24 @@ export async function updateRolePermissions(roleId: string, permissionIds: strin
   }
 
   revalidatePath("/admin/roles");
+  revalidatePath("/admin/roles");
+  return { success: true };
+}
+
+export async function updateRole(roleId: string, name: string, description: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("roles").update({ name, description }).eq("id", roleId);
+  if (error) return { error: error.message };
+  
+  revalidatePath("/admin/roles");
+  return { success: true };
+}
+
+export async function deleteRole(roleId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("roles").delete().eq("id", roleId);
+  if (error) return { error: error.message };
+  
+  revalidatePath("/admin/roles");
   return { success: true };
 }

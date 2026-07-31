@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CreateRoleModal } from "@/components/CreateRoleModal";
 import { ConfigurePermissionsModal } from "@/components/ConfigurePermissionsModal";
+import { EditRoleModal } from "@/components/EditRoleModal";
+import { DeleteRoleButton } from "@/components/DeleteRoleButton";
 import { getUserPermissions, hasPermission } from "@/lib/permissions";
 
 export default async function AdminRolesPage() {
@@ -79,7 +81,11 @@ export default async function AdminRolesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     {canManage ? (
-                      <ConfigurePermissionsModal role={role} allPermissions={allPermissions || []} />
+                      <div className="flex justify-end gap-2 items-center">
+                        <ConfigurePermissionsModal role={role} allPermissions={allPermissions || []} />
+                        <EditRoleModal role={role} />
+                        <DeleteRoleButton roleId={role.id} roleName={role.name} />
+                      </div>
                     ) : (
                       <span className="text-xs text-slate-400 italic">View Only</span>
                     )}
