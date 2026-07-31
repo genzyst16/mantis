@@ -129,10 +129,18 @@ export async function deletePersonnel(userId: string) {
     return { error: "Cannot delete a Super Admin account." };
   }
 
+  // Workaround: Clear created_by on inspection_templates to prevent Foreign Key constraint violation
+  // because the migration didn't add ON DELETE SET NULL to this specific column.
+  await supabaseAdmin
+    .from("inspection_templates")
+    .update({ created_by: null })
+    .eq("created_by", userId);
+
   const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
   
   if (error) {
-    return { error: error.message };
+    console.error("Error deleting user:", error);
+    return { error: error.message || JSON.stringify(error) || "An unknown error occurred while deleting the user." };
   }
 
   revalidatePath("/admin/personnel");
