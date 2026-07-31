@@ -3,12 +3,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateScheduleModal } from "@/components/CreateScheduleModal";
+import { EditScheduleModal } from "@/components/EditScheduleModal";
+import { DeleteScheduleButton } from "@/components/DeleteScheduleButton";
+import { getUserPermissions, hasPermission } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSchedulesPage() {
   const supabase = await createClient();
-  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userPerms = await getUserPermissions(supabase, user.id);
+  const canCreate = hasPermission(userPerms, "schedules.create");
+  const canEdit = hasPermission(userPerms, "schedules.edit");
+  const canDelete = hasPermission(userPerms, "schedules.delete");
+
   const { data: schedules } = await supabase
     .from("inspection_schedules")
     .select("*, checkpoints(checkpoint_name, checkpoint_code)")
@@ -24,7 +34,9 @@ export default async function AdminSchedulesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Schedules</h2>
         
-        <CreateScheduleModal checkpoints={checkpoints || []} />
+        {canCreate && (
+          <CreateScheduleModal checkpoints={checkpoints || []} />
+        )}
       </div>
 
       <Card>
@@ -39,12 +51,13 @@ export default async function AdminSchedulesPage() {
                 <TableHead>Frequency</TableHead>
                 <TableHead>Window</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(!schedules || schedules.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-slate-500 py-6">
+                  <TableCell colSpan={5} className="text-center text-slate-500 py-6">
                     No schedules found. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -60,6 +73,12 @@ export default async function AdminSchedulesPage() {
                     ) : (
                       <span className="text-slate-500 bg-slate-100 px-2 py-1 rounded-full text-xs font-medium">Inactive</span>
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {canEdit && <EditScheduleModal schedule={schedule} checkpoints={checkpoints || []} />}
+                      {canDelete && <DeleteScheduleButton schedule={schedule} />}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
